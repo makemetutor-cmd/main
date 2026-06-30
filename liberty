@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Liberty Bank · accounts</title>
+  <style>
+    :root {
+      --red: #d71920;
+      --dark-red: #b20d16;
+      --gold: #f6c400;
+      --ink: #24384a;
+      --muted: #667382;
+      --line: #c7c7c7;
+      --soft: #f2f2f2;
+      --sidebar: #55575a;
+      --blue: #0073a6;
+      --white: #fff;
+      --shadow: 0 2px 7px rgba(0,0,0,.22);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; color: var(--ink); background: #f6efe9; }
+    body {
+      background:
+        linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.12)),
+        radial-gradient(circle at 18% 38%, rgba(255,228,198,.9) 0 12%, transparent 25%),
+        radial-gradient(circle at 70% 52%, rgba(255,207,169,.85) 0 11%, transparent 27%),
+        linear-gradient(180deg,#ffe2d9 0,#fff0df 35%,#f7c99f 72%,#dbc29b 100%);
+      background-attachment: fixed;
+    }
+    .demo-ribbon { display: none; }
+    .topbar { background: var(--red); height: 56px; color: white; position: relative; border-bottom: 4px solid var(--gold); }
+    .topbar-inner { max-width: 1060px; margin: 0 auto; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-family: Georgia, 'Times New Roman', serif; font-size: 28px; font-weight: 700; letter-spacing: .03em; }
+    .top-icons { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+    .icon { width: 24px; height: 24px; border: 2px solid white; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; }
+    .mail { border: 2px solid white; border-radius: 2px; width: 24px; height: 16px; position: relative; }
+    .badge { position: absolute; background: white; color: var(--red); font-weight: 700; border-radius: 50%; font-size: 11px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin-left: 18px; margin-top: -13px; }
+    .signoff { border-left: 1px solid rgba(255,255,255,.7); border-right: 1px solid rgba(255,255,255,.7); padding: 0 16px; display: flex; gap: 8px; align-items: center; }
+    .person { width: 38px; height: 38px; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: background 0.2s; }
+    .person:hover { background: rgba(255,255,255,0.15); }
+    .nav { height: 44px; background: white; border-bottom: 1px solid #8d8d8d; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+    .nav-inner { max-width: 1060px; margin: 0 auto; height: 44px; display: flex; align-items: center; justify-content: space-around; }
+    .nav button { background: none; border: 0; color: #172333; font-size: 14px; padding: 14px 34px; height: 44px; border-left: 1px solid #aaa; cursor: pointer; }
+    .nav button:first-child { border-left: 0; }
+    .nav button:hover, .nav button:focus { text-decoration: underline; outline: 2px solid transparent; }
+    .crumb { height: 40px; background: #e7e7e4; border-bottom: 1px solid #c9c9c9; box-shadow: 0 2px 5px rgba(0,0,0,.18); }
+    .crumb-inner { max-width: 1060px; margin: 0 auto; display: flex; height: 40px; align-items: center; justify-content: space-between; font-size: 18px; }
+    .home { font-size: 18px; margin-right: 6px; color: #3d4248; }
+    .switch { font-size: 16px; color: #303a45; }
+    .main { max-width: 1060px; margin: 0 auto; display: grid; grid-template-columns: minmax(690px, 760px) 300px; gap: 22px; min-height: 720px; }
+    .content { background: #f8f8f8; box-shadow: 0 0 0 1px rgba(0,0,0,.12); padding: 30px 22px 45px; }
+    .welcome { background: #fff; box-shadow: var(--shadow); min-height: 76px; margin: 0 0 24px; padding: 18px 26px; font-size: 20px; }
+    .total-row { display: flex; justify-content: space-between; padding: 0 34px 12px 34px; font-size: 20px; color: #6c7887; }
+    .account-card { position: relative; background: #fff; margin: 0 0 16px; min-height: 130px; box-shadow: var(--shadow); display: grid; grid-template-columns: 70px 1fr 220px 26px; border-left: 6px solid var(--red); outline: none; }
+    .account-card:hover, .account-card:focus { box-shadow: 0 0 0 3px #65b9e9, var(--shadow); cursor: pointer; }
+    .account-card.selected { box-shadow: 0 0 0 3px #0073a6, var(--shadow); }
+    .bars { align-self: start; margin: 28px auto 0; width: 31px; height: 32px; display: grid; grid-template-columns: repeat(4,6px); gap: 2px; align-items: end; opacity: .3; }
+    .bars span { background: #888; display: block; }
+    .bars span:nth-child(1) { height: 18px; }
+    .bars span:nth-child(2) { height: 26px; }
+    .bars span:nth-child(3) { height: 23px; }
+    .bars span:nth-child(4) { height: 27px; }
+    .acct-title { padding: 19px 0 0; font-size: 21px; line-height: 1.2; color: #c30012; }
+    .acct-sub { font-size: 14px; color: #4f6374; margin-top: 8px; line-height: 1.45; }
+    .balance { padding: 19px 28px 0 0; text-align: right; font-size: 20px; letter-spacing: .03em; }
+    .smalllink { display: block; font-size: 13px; color: #3d5060; text-decoration: underline; text-decoration-style: dotted; margin-top: 6px; line-height: 1.15; }
+    .kebab { background: #696b6d; color: white; display: flex; align-items: center; justify-content: center; font-size: 30px; letter-spacing: 2px; writing-mode: vertical-rl; }
+    .side { padding-top: 0; }
+    .ad { height: 358px; background: linear-gradient(145deg,#5e23c8,#b83b99 70%,#f16c45); color: white; padding: 28px 24px; overflow: hidden; position: relative; }
+    .ad h2 { margin: 0; font-size: 31px; line-height: 1.05; font-weight: 700; }
+    .qr { margin-top: 25px; width: 72px; height: 72px; background: repeating-linear-gradient(90deg,#fff 0 4px,transparent 4px 8px),repeating-linear-gradient(0deg,rgba(255,255,255,.7) 0 4px,transparent 4px 8px); border: 4px solid white; }
+    .stars { font-weight: 700; margin-top: 18px; letter-spacing: .2em; }
+    .phone { position: absolute; right: 18px; bottom: -20px; width: 150px; height: 205px; border: 9px solid black; border-radius: 24px; background: #fff; transform: rotate(-9deg); box-shadow: 0 6px 18px rgba(0,0,0,.32); }
+    .phone:before { content: 'Quick Pay'; display: block; color: #555; margin: 35px 10px 0; font-size: 13px; }
+    .phone:after { content: ''; display: block; margin: 25px auto; width: 110px; height: 46px; background: #eee; border-radius: 4px; }
+    .panel { background: #55575a; color: #fff; border-top: 2px solid var(--gold); }
+    .panel h3 { margin: 0; padding: 13px 20px; font-size: 18px; font-weight: 400; border-bottom: 1px solid #777; }
+    .panel h3:before { content: '♢'; color: var(--gold); margin-right: 12px; }
+    .panel a { display: flex; justify-content: space-between; align-items: center; color: white; text-decoration: none; padding: 14px 22px; border-bottom: 1px solid #6e7072; font-size: 15px; }
+    .panel a:hover { text-decoration: underline; background: #4e5052; }
+    .arrow { font-size: 28px; color: #aaa; }
+    .footer { background: #fff; margin-top: 0; border-top: 1px solid #ddd; text-align: center; padding: 28px 15px; color: #111; font-weight: 800; letter-spacing: .08em; }
+    .tiny { font-size: 12px; color: #6b7680; margin: 12px 0 0; text-align: center; }
+    .sr-only { position: absolute; left: -9999px; }
+    .notice { background: #fff9e1; border-left: 4px solid #d6a500; margin: 0 0 18px; padding: 11px 14px; color: #38342a; font-size: 14px; }
+    /* activity view (merged from Third) */
+    .activity-container { background: white; box-shadow: 0 0 0 1px rgba(0,0,0,.15); margin-top: 20px; padding: 0 0 10px; display: none; }
+    .activity-container.active { display: block; }
+    .subnav { height: 29px; padding: 0 26px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #d6d6d6; font-size: 14px; }
+    .subnav a { color: #006e9c; text-decoration: underline; }
+    .section-title { padding: 15px 12px 10px; font-weight: 700; color: #111; text-decoration: underline; text-decoration-style: dotted; }
+    .minus { border: 1px solid #0089c7; color: #0089c7; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-right: 6px; font-weight: 400; text-decoration: none; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; }
+    .pending th { color: #5c6772; font-weight: 400; padding: 8px 48px; text-align: left; border-top: 1px solid #c9c9c9; border-bottom: 1px solid #c9c9c9; }
+    .pending td { padding: 8px 48px; border-bottom: 1px solid #e5e5e5; }
+    .pending tbody tr:nth-child(even) { background: #f3f3f3; }
+    .amount { text-align: right !important; padding-right: 48px !important; }
+    .pager { height: 50px; display: flex; align-items: center; gap: 16px; padding: 0 20px; color: #b6b6a8; border-bottom: 1px solid #c9c9c9; }
+    .pager a { color: #0073a6; text-decoration: none; }
+    .pager a:hover { text-decoration: underline; }
+    .posted th { color: #006e9c; font-weight: 400; text-align: left; padding: 7px 18px; border-bottom: 1px solid #a8c7d8; }
+    .posted th.amount { text-align: right; }
+    .posted td { padding: 9px 18px; vertical-align: top; border-bottom: 1px solid #f1f1f1; }
+    .posted tbody tr:nth-child(even) { background: #f4f4f4; }
+    .posted tbody tr:hover { outline: 2px solid #65b9e9; outline-offset: -2px; cursor: pointer; }
+    .plus { border: 1px solid #0089c7; color: #0089c7; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; font-size: 16px; }
+    .date { width: 145px; }
+    .desc { color: #394b5d; line-height: 1.35; }
+    .balance-col { text-align: right; color: #394b5d; }
+    .credit { font-weight: 700; color: #1f5333; }
+    .demo-note { margin: 18px 24px; padding: 11px 14px; background: #fff9e1; border-left: 4px solid #d6a500; color: #38342a; font-size: 14px; }
+    .detail-row { display: none; background: #fff !important; }
+    .detail-row td { padding: 12px 70px; color: #334; }
+    .detail-row.open { display: table-row; }
+    .back { color: #006e9c; text-decoration: underline; cursor: pointer; }
+    .acct-banner { padding: 15px 26px; background: #f7f7f7; border-bottom: 1px solid #ccc; display: flex; justify-content: space-between; align-items: center; }
+    .acct-banner select { font-size: 14px; padding: 5px 8px; }
+    .acct-balance { font-size: 20px; font-weight: 700; }
+    .hidden { display: none; }
+    /* Profile popup */
+    .profile-popup {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background: white;
+      color: #1e2a3a;
+      padding: 20px 24px;
+      border-radius: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      width: 320px;
+      z-index: 100;
+      border: 1px solid #ddd;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .profile-popup.active { display: block; }
+    .profile-popup h3 { margin: 0 0 12px 0; color: var(--red); border-bottom: 2px solid var(--gold); padding-bottom: 8px; }
+    .profile-popup p { margin: 6px 0; }
+    .profile-popup .label { font-weight: 600; color: #3d5060; display: inline-block; width: 70px; }
+    .profile-popup .close-btn {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #888;
+      padding: 0 4px;
+    }
+    .profile-popup .close-btn:hover { color: #222; }
+    @media(max-width:980px) {
+      .main { grid-template-columns: 1fr; }
+      .side { display: none; }
+      .topbar-inner, .nav-inner, .crumb-inner, .main { max-width: 760px; }
+      .nav button { padding: 14px 12px; }
+      .account-card { grid-template-columns: 56px 1fr 170px 26px; }
+      .brand { font-size: 24px; }
+      .top-icons { gap: 10px; }
+      .total-row { padding-left: 12px; padding-right: 12px; }
+      .profile-popup { right: 10px; width: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">Liberty Bank</div>
+    <div class="top-icons">
+      <span title="Search">⌕</span>
+      <span class="mail" title="Messages"><span class="badge">1</span></span>
+      <span class="signoff">♙ <button onclick="alert('Sign off action is not available in this view.');" style="background:transparent;border:0;color:white;font:inherit;cursor:pointer">Sign Off</button></span>
+      <span class="person" onclick="toggleProfile()" aria-label="Profile" title="Click for profile">○</span>
+      <span>Welcome</span>
+      <button onclick="alert('Welcome menu — view only.');" style="background:transparent;border:0;color:white;font-size:18px;cursor:pointer" aria-label="welcome menu">⌄</button>
+    </div>
+  </div>
+  <!-- Profile popup -->
+  <div id="profilePopup" class="profile-popup">
+    <button class="close-btn" onclick="toggleProfile()">×</button>
+    <h3>Profile</h3>
+    <p><span class="label">Name:</span> Peter Galgano Jr.</p>
+    <p><span class="label">Email:</span> petergalgano@comcast.net</p>
+    <p><span class="label">Mobile:</span> +1 860 604 7258</p>
+    <p><span class="label">Address:</span> 424 New Britain Rd<br> Kensington, CT 06037, USA</p>
+  </div>
+</header>
+
+<nav class="nav" aria-label="primary">
+  <div class="nav-inner">
+    <button type="button" onclick="alert('Accounts menu (view only)')">Accounts⌄</button>
+    <button type="button" onclick="alert('Brokerage menu (view only)')">Brokerage</button>
+    <button type="button" onclick="alert('Transfer & Pay menu (view only)')">Transfer &amp; Pay⌄</button>
+    <button type="button" onclick="alert('Plan & Learn menu (view only)')">Plan &amp; Learn⌄</button>
+    <button type="button" onclick="alert('Security & Support menu (view only)')">Security &amp; Support⌄</button>
+  </div>
+</nav>
+
+<div class="crumb">
+  <div class="crumb-inner">
+    <div><span class="home">⌂</span>Account Summary</div>
+    <div class="switch">Switch Account ▾</div>
+  </div>
+</div>
+
+<main class="main">
+  <section class="content" aria-label="account summary">
+    <div class="welcome">Welcome back. Select an account below to view activity.</div>
+    <div class="total-row"><span>Personal Accounts</span><strong>$20,000.00</strong></div>
+
+    <article class="account-card" tabindex="0" role="button" aria-label="Savings account" onclick="selectAccount(this,'Savings account selected.')" onkeydown="cardKey(event,this,'Savings account selected.')">
+      <div class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div>
+        <div class="acct-title">Savings</div>
+        <div class="acct-sub">.... 8812<br>Personal Savings</div>
+      </div>
+      <div class="balance">$00.00<span class="smalllink">Available balance</span></div>
+      <div class="kebab" aria-hidden="true">•••</div>
+    </article>
+
+    <article class="account-card" tabindex="0" role="button" aria-label="Checking account, open activity page" onclick="openCheckingActivity()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCheckingActivity();}">
+      <div class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div>
+        <div class="acct-title">Checking</div>
+        <div class="acct-sub">.... 5643<br>Personal Checking<br><strong>06/29/2026 cash deposit credited</strong></div>
+      </div>
+      <div class="balance">$20,000.00<span class="smalllink">Available balance</span></div>
+      <div class="kebab" aria-hidden="true">•••</div>
+    </article>
+
+    <div class="tiny">All entries, balances, names, and account numbers on this page are fictional content.</div>
+
+    <!-- activity container (merged from Third.html) -->
+    <div id="activityContainer" class="activity-container">
+      <div class="acct-banner">
+        <div><span class="back" onclick="closeActivity()">‹ Back to Account Summary</span></div>
+        <label>Viewing account
+          <select onchange="changeAccount(this.value)">
+            <option value="checking" selected>Checking ....5643</option>
+            <option value="savings">Savings ....8812</option>
+          </select>
+        </label>
+        <div class="acct-balance" id="accountBalance">$20,000.00</div>
+      </div>
+      <div class="demo-note">This is a non‑functional activity view. It does not connect to any real bank.</div>
+      <div class="subnav"><a href="#" onclick="return demoLink(event)">Download Account Activity</a><span>|</span><a href="#" onclick="return demoLink(event)">Track Claims</a><span>|</span><a href="#" onclick="return demoLink(event)">Redeem for Purchases</a></div>
+
+      <div id="checkingView">
+        <div class="section-title"><span class="minus">−</span>Pending transactions</div>
+        <table class="pending" aria-label="pending transactions">
+          <thead><tr><th>Transaction Date</th><th>Description</th><th class="amount">Amount</th></tr></thead>
+          <tbody><tr><td>06/29/26</td><td>Cash deposit (pending)</td><td class="amount">+$20,000.00</td></tr></tbody>
+        </table>
+        <div class="pager"><span>‹ First</span><span>‹ Previous</span><a href="#" onclick="return demoLink(event)">Next ›</a></div>
+        <table class="posted" aria-label="posted transactions">
+          <thead><tr><th style="width:34px"></th><th class="date">Transaction Date ↕</th><th class="date">Posting Date ▾</th><th>Description ↕</th><th class="amount">Amount ↕</th><th class="balance-col">Running balance</th></tr></thead>
+          <tbody>
+            <tr onclick="toggleDetail(this)"><td><span class="plus">+</span></td><td>06/29/26</td><td>06/29/26</td><td class="desc"><strong>CASH DEPOSIT</strong><br>#DEMO-CASH-06292026</td><td class="amount credit">+$20,000.00</td><td class="balance-col">$20,000.00</td></tr>
+            <tr class="detail-row"><td colspan="6">detail: Cash deposit credited to checking account on 06/29/2026. This Cash Is Submitted Via Jason Cash Collection Agent.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="savingsView" class="hidden">
+        <div class="section-title"><span class="minus">−</span>Savings activity</div>
+        <table class="posted" aria-label="savings transactions">
+          <thead><tr><th style="width:34px"></th><th class="date">Transaction Date</th><th class="date">Posting Date</th><th>Description</th><th class="amount">Amount</th><th class="balance-col">Running balance</th></tr></thead>
+          <tbody>
+            <tr onclick="toggleDetail(this)"><td><span class="plus">+</span></td><td>06/15/26</td><td>06/15/26</td><td class="desc">INTEREST CREDIT<br>#SAVINGS-DEMO</td><td class="amount credit">+$12.44</td><td class="balance-col">$3,450.25</td></tr>
+            <tr class="detail-row"><td colspan="6">Savings transaction details (view only).</td></tr>
+            <tr onclick="toggleDetail(this)"><td><span class="plus">+</span></td><td>06/01/26</td><td>06/01/26</td><td class="desc">TRANSFER TO SAVINGS<br>#TRANSFER-DEMO</td><td class="amount credit">+$250.00</td><td class="balance-col">$3,437.81</td></tr>
+            <tr class="detail-row"><td colspan="6">Savings transaction details (view only).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side" aria-label="tools">
+    <div class="ad" aria-label="promotional panel">
+      <h2>Send money<br>on the spot</h2>
+      <div class="qr" aria-hidden="true"></div>
+      <div class="stars">★★★★★ <span style="letter-spacing:0;font-size:13px">4.9</span></div>
+      <div class="phone" aria-hidden="true"></div>
+    </div>
+    <div class="panel">
+      <h3>Security Tools</h3>
+      <a href="#" onclick="return demoLink(event)">Visit the Security Center <span class="arrow">›</span></a>
+      <a href="#" onclick="return demoLink(event)">Manage your mobile number <span class="arrow">›</span></a>
+    </div>
+    <div class="panel" style="margin-top:0">
+      <h3>Planning &amp; Tools</h3>
+      <a href="#" onclick="return demoLink(event)">View planning tools <span class="arrow">›</span></a>
+    </div>
+  </aside>
+</main>
+
+<script>
+  function selectAccount(card, msg) {
+    document.querySelectorAll('.account-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    alert(msg);
+  }
+  function cardKey(event, card, msg) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      selectAccount(card, msg);
+    }
+  }
+  function openCheckingActivity() {
+    const container = document.getElementById('activityContainer');
+    container.classList.add('active');
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('checkingView').classList.remove('hidden');
+    document.getElementById('savingsView').classList.add('hidden');
+    document.getElementById('accountBalance').textContent = '$20,000.00';
+  }
+  function closeActivity() {
+    document.getElementById('activityContainer').classList.remove('active');
+  }
+  function changeAccount(value) {
+    const checking = document.getElementById('checkingView');
+    const savings = document.getElementById('savingsView');
+    const bal = document.getElementById('accountBalance');
+    if (value === 'savings') {
+      checking.classList.add('hidden');
+      savings.classList.remove('hidden');
+      bal.textContent = '$3,450.25';
+    } else {
+      checking.classList.remove('hidden');
+      savings.classList.add('hidden');
+      bal.textContent = '$20,000.00';
+    }
+  }
+  function toggleDetail(row) {
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('detail-row')) {
+      next.classList.toggle('open');
+      const plus = row.querySelector('.plus');
+      if (plus) plus.textContent = next.classList.contains('open') ? '−' : '+';
+    }
+  }
+  function demoLink(event) {
+    event.preventDefault();
+    alert('Link is for demonstration only.');
+    return false;
+  }
+  // Profile toggle
+  function toggleProfile() {
+    const popup = document.getElementById('profilePopup');
+    popup.classList.toggle('active');
+  }
+  // close profile if click outside
+  document.addEventListener('click', function(e) {
+    const popup = document.getElementById('profilePopup');
+    const person = document.querySelector('.person');
+    if (popup.classList.contains('active') && !popup.contains(e.target) && !person.contains(e.target)) {
+      popup.classList.remove('active');
+    }
+  });
+  // make "Back" work if clicked from inside activity
+  document.querySelector('.back')?.addEventListener('click', closeActivity);
+</script>
+</body>
+</html>
